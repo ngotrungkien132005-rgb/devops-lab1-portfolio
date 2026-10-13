@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học GitHub Actions | Tự Động Hóa CI/CD</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Màu chủ đạo GitHub Actions (Xanh lam) */
+            --primary: #0969da;
+            --primary-hover: #035cc5;
+            --primary-light: rgba(9, 105, 218, 0.1);
+            
+            /* Theme Sáng (Light) */
+            --bg-body: #f6f8fa;
+            --bg-card: #ffffff;
+            --bg-nav: rgba(255, 255, 255, 0.85);
+            --text-main: #24292f;
+            --text-muted: #57606a;
+            --border-color: #d0d7de;
+            --code-bg: #f6f8fa;
+            --code-text: #24292f;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            
+            --radius: 8px;
+            --radius-lg: 12px;
+            
+            /* Trắc nghiệm Feedback */
+            --success-bg: #dafbe1;
+            --success-text: #1a7f37;
+            --success-border: #4ac26b;
+            --warning-bg: #fff8c5;
+            --warning-text: #9a6700;
+            --warning-border: #d4a72c;
+            --error-bg: #ffebe9;
+            --error-text: #cf222e;
+            --error-border: #ff8182;
+        }
+
+        /* Theme Tối (Dark) chuẩn GitHub */
+        [data-theme="dark"] {
+            --primary: #58a6ff;
+            --primary-hover: #318bf8;
+            --primary-light: rgba(88, 166, 255, 0.15);
+            
+            --bg-body: #0d1117;
+            --bg-card: #161b22;
+            --bg-nav: rgba(13, 17, 23, 0.85);
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --code-bg: #0d1117;
+            --code-text: #c9d1d9;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+            
+            --success-bg: #1a412cb3;
+            --success-text: #3fb950;
+            --success-border: #2ea043;
+            --warning-bg: #4d3c0fb3;
+            --warning-text: #d29922;
+            --warning-border: #bb8009;
+            --error-bg: #490202b3;
+            --error-text: #f85149;
+            --error-border: #da3633;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px; 
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { max-width: 100%; height: auto; }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--bg-body);
+            border-color: var(--text-muted);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        h1, h2, h3, h4, h5, h6 { font-weight: 600; line-height: 1.25; margin-bottom: 1rem; }
+        .text-center { text-align: center; }
+        .text-primary { color: var(--primary); }
+        .text-muted { color: var(--text-muted); }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        
+        .grid { display: grid; gap: 24px; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-nav);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo i { font-size: 1.8rem; }
+
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text-main); }
+
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+        .icon-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover { background: var(--bg-body); }
+        .menu-toggle { display: none; }
+
+        section { padding: 80px 0; }
+        .section-alt {
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 64px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            border: 1px solid rgba(9, 105, 218, 0.2);
+        }
+
+        .hero h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); letter-spacing: -1px; margin-bottom: 20px; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto 30px; }
+
+        .concept-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .code-container {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        [data-theme="dark"] .code-header { background-color: rgba(255, 255, 255, 0.05); }
+
+        .code-block {
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--code-text);
+        }
+
+        /* YAML Syntax Highlighting colors */
+        .yaml-key { color: #cf222e; }
+        .yaml-string { color: #0a3069; }
+        .yaml-comment { color: #6e7781; font-style: italic; }
+        [data-theme="dark"] .yaml-key { color: #ff7b72; }
+        [data-theme="dark"] .yaml-string { color: #a5d6ff; }
+        [data-theme="dark"] .yaml-comment { color: #8b949e; }
+
+        .quiz-question { margin-bottom: 24px; }
+        .quiz-question h4 { font-size: 1.05rem; margin-bottom: 12px; }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover { background-color: var(--bg-body); border-color: var(--text-muted); }
+        .quiz-option input[type="radio"] {
+            margin-right: 12px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+
+        .quiz-result-box {
+            display: none;
+            text-align: center;
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            border: 1px solid;
+            margin-top: 24px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .quiz-result-box.success { background-color: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
+        .quiz-result-box.warning { background-color: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-border); }
+        .quiz-result-box.error { background-color: var(--error-bg); color: var(--error-text); border-color: var(--error-border); }
+
+        footer {
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                width: 100%;
+                background-color: var(--bg-card);
+                flex-direction: column;
+                padding: 16px 20px;
+                border-bottom: 1px solid var(--border-color);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+            .nav-links.active { display: flex; }
+            .menu-toggle { display: flex; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .hero-btns { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i class="fa-brands fa-github"></i>
+                <span>GitHub Actions</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#home">Trang chủ</a></li>
+                    <li><a href="#intro">Giới thiệu</a></li>
+                    <li><a href="#concepts">Cấu trúc cơ bản</a></li>
+                    <li><a href="#example">Ví dụ YAML</a></li>
+                    <li><a href="#quiz">Bài tập</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <button id="themeToggle" class="icon-btn" aria-label="Chuyển đổi giao diện">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+                <button id="menuToggle" class="icon-btn menu-toggle" aria-label="Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container">
+                <span class="hero-badge">CI/CD Automation</span>
+                <h1>Tự động hóa mọi thứ với <br><span class="text-primary">GitHub Actions</span></h1>
+                <p>Nền tảng CI/CD (Continuous Integration & Continuous Deployment) mạnh mẽ, được tích hợp trực tiếp ngay trong kho lưu trữ GitHub của bạn.</p>
+                <div class="hero-btns" style="display: flex; gap: 16px; justify-content: center;">
+                    <a href="#concepts" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> Học cấu trúc cơ bản</a>
+                    <a href="#quiz" class="btn btn-outline"><i class="fa-solid fa-list-check"></i> Làm trắc nghiệm</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="intro" class="section-alt">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="text-center mb-8">GitHub Actions là gì?</h2>
+                <div>
+                    <p class="mb-4 text-muted">
+                        <strong>GitHub Actions</strong> cho phép bạn tự động hóa, tùy chỉnh và thực thi các quy trình phát triển phần mềm (software development workflows) ngay trong kho lưu trữ (repository) của mình.
+                    </p>
+                    <p class="mb-4 text-muted">
+                        Bạn có thể khám phá, tạo và chia sẻ các hành động (actions) để thực hiện bất kỳ công việc nào, bao gồm cả CI/CD. Chẳng hạn, bạn có thể thiết lập quy trình tự động <strong>chạy test mỗi khi có người push code</strong>, hoặc tự động <strong>deploy lên server khi có bản release mới</strong>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="concepts">
+            <div class="container">
+                <h2 class="text-center mb-8">5 Thành Phần Cốt Lõi</h2>
+                
+                <div class="grid grid-3">
+                    <div class="card">
+                        <div class="concept-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                        <h3>1. Workflows</h3>
+                        <p class="text-muted">Một quy trình tự động hóa có thể thiết lập được. Workflows được định nghĩa bằng file YAML đặt trong thư mục <code>.github/workflows</code> của repository.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="concept-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <h3>2. Events</h3>
+                        <p class="text-muted">Sự kiện kích hoạt (trigger) để workflow bắt đầu chạy. Ví dụ: khi có lệnh <code>push</code>, mở một <code>pull request</code>, hoặc chạy theo lịch (cron).</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="concept-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <h3>3. Jobs</h3>
+                        <p class="text-muted">Một tập hợp các bước (steps) thực thi trên cùng một máy chủ (runner). Mặc định các jobs chạy song song, nhưng có thể thiết lập phụ thuộc nhau.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="concept-icon"><i class="fa-solid fa-stairs"></i></div>
+                        <h3>4. Steps</h3>
+                        <p class="text-muted">Một nhiệm vụ đơn lẻ trong một Job. Nó có thể là một lệnh shell (chạy script) hoặc gọi đến một <code>Action</code> có sẵn.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="concept-icon"><i class="fa-solid fa-server"></i></div>
+                        <h3>5. Runners</h3>
+                        <p class="text-muted">Máy chủ (server) cài sẵn ứng dụng GitHub Actions runner. Có thể dùng máy ảo do GitHub cấp (Ubuntu, Windows, macOS) hoặc tự host.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="example" class="section-alt">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="text-center mb-4">Ví Dụ Cấu Hình YAML</h2>
+                <p class="text-center text-muted mb-8">Dưới đây là một Workflow CI đơn giản dành cho dự án Node.js. Nó sẽ tự động kích hoạt mỗi khi có code mới được đẩy (push) lên nhánh <code>main</code>.</p>
+                
+                <div class="code-container">
+                    <div class="code-header">
+                        <span><i class="fa-brands fa-github" style="margin-right:8px;"></i>.github/workflows/node.js.yml</span>
+                        <button class="icon-btn" style="width: 28px; height: 28px; font-size: 0.8rem;" aria-label="Copy code"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <div class="code-block">
+<pre><code><span class="yaml-key">name:</span> <span class="yaml-string">Node.js CI</span>
+
+<span class="yaml-key">on:</span>
+  <span class="yaml-key">push:</span>
+    <span class="yaml-key">branches:</span> <span class="yaml-string">[ "main" ]</span>
+
+<span class="yaml-key">jobs:</span>
+  <span class="yaml-key">build:</span>
+    <span class="yaml-key">runs-on:</span> <span class="yaml-string">ubuntu-latest</span>
+
+    <span class="yaml-key">steps:</span>
+    <span class="yaml-comment"># Lấy mã nguồn từ Repository xuống Runner</span>
+    <span class="yaml-key">- uses:</span> <span class="yaml-string">actions/checkout@v3</span>
+    
+    <span class="yaml-comment"># Cài đặt môi trường Node.js</span>
+    <span class="yaml-key">- name:</span> <span class="yaml-string">Use Node.js</span>
+      <span class="yaml-key">uses:</span> <span class="yaml-string">actions/setup-node@v3</span>
+      <span class="yaml-key">with:</span>
+        <span class="yaml-key">node-version:</span> <span class="yaml-string">'18.x'</span>
+        
+    <span class="yaml-comment"># Chạy các lệnh script</span>
+    <span class="yaml-key">- run:</span> <span class="yaml-string">npm ci</span>
+    <span class="yaml-key">- run:</span> <span class="yaml-string">npm run build</span>
+    <span class="yaml-key">- run:</span> <span class="yaml-string">npm test</span></code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz">
+            <div class="container" style="max-width: 700px;">
+                <h2 class="text-center mb-2">Kiểm Tra Kiến Thức</h2>
+                <p class="text-center text-muted mb-8">Hãy thử sức với 3 câu trắc nghiệm nhanh để củng cố lý thuyết.</p>
+
+                <div class="card">
+                    <div id="quizContainer">
+                        <!-- Câu 1 -->
+                        <div class="quiz-question">
+                            <h4>1. Tập tin định nghĩa Workflow của GitHub Actions phải được đặt trong thư mục nào?</h4>
+                            <label class="quiz-option">
+                                <input type="radio" name="q1" value="a"> /.actions
+                            </label>
+                            <label class="quiz-option">
+                                <input type="radio" name="q1" value="b"> /.github/workflows
+                            </label>
+                            <label class="quiz-option">
+                                <input type="radio" name="q1" value="c"> /ci-cd/pipelines
+                            </label>
+                        </div>
+
+                        <!-- Câu 2 -->
+                        <div class="quiz-question">
+                            <h4>2. Máy chủ thực thi các dòng lệnh trong Job được gọi là gì?</h4>
+                            <label class="quiz-option">
+                                <input type="radio" name="q2" value="a"> Runner
+                            </label>
+                            <label class="quiz-option">
+                                <input type="radio" name="q2" value="b"> Docker
+                            </label>
+                            <label class="quiz-option">
+                                <input type="radio" name="q2" value="c"> Executor
+                            </label>
+                        </div>
+
+                        <!-- Câu 3 -->
+                        <div class="quiz-question">
+                            <h4>3. Khóa (Key) nào trong file YAML dùng để xác định <strong>sự kiện kích hoạt (event)</strong>?</h4>
+                            <label class="quiz-option">
+                                <input type="radio" name="q3" value="a"> trigger:
+                            </label>
+                            <label class="quiz-option">
+                                <input type="radio" name="q3" value="b"> start:
+                            </label>
+                            <label class="quiz-option">
+                                <input type="radio" name="q3" value="c"> on:
+                            </label>
+                        </div>
+
+                        <button id="submitQuizBtn" class="btn btn-primary btn-block" style="margin-top: 16px;">Nộp bài & Xem kết quả</button>
+                    </div>
+
+                    <!-- Khu vực Hiển thị Kết quả -->
+                    <div id="quizResult" class="quiz-result-box">
+                        <h3 id="resultTitle" class="mb-2"></h3>
+                        <p id="resultText" class="mb-4"></p>
+                        <button id="retryQuizBtn" class="btn btn-outline">Làm lại bài thi</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="logo" style="justify-content: center; margin-bottom: 16px; color: var(--text-main);">
+                <i class="fa-brands fa-github"></i>
+                <span>GitHub Actions Guide</span>
+            </div>
+            <p class="text-muted mb-4">Tài liệu học tập tự động hóa CI/CD cơ bản.<br>Được xây dựng bằng HTML, CSS thuần và JavaScript.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">&copy; 2026 Dev Education. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            /* === Mobile Menu Logic === */
+            const menuToggle = document.getElementById('menuToggle');
+            const navLinks = document.getElementById('navLinks');
+
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                });
+            });
+
+            /* === Dark Mode Logic === */
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const htmlTag = document.documentElement;
+
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                htmlTag.setAttribute('data-theme', 'dark');
+                updateIcon(true);
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = htmlTag.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    htmlTag.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    updateIcon(false);
+                } else {
+                    htmlTag.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    updateIcon(true);
+                }
+            });
+
+            function updateIcon(isDark) {
+                if (isDark) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+            }
+
+            /* === Quiz Logic === */
+            const submitBtn = document.getElementById('submitQuizBtn');
+            const retryBtn = document.getElementById('retryQuizBtn');
+            const quizContainer = document.getElementById('quizContainer');
+            const quizResultBox = document.getElementById('quizResult');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+
+            const correctAnswers = {
+                q1: 'b', // .github/workflows
+                q2: 'a', // Runner
+                q3: 'c'  // on:
+            };
+
+            submitBtn.addEventListener('click', () => {
+                let score = 0;
+                let total = Object.keys(correctAnswers).length;
+                let isComplete = true;
+
+                for (let [qName, qAnswer] of Object.entries(correctAnswers)) {
+                    const selected = document.querySelector(`input[name="${qName}"]:checked`);
+                    if (!selected) {
+                        isComplete = false;
+                        break;
+                    }
+                    if (selected.value === qAnswer) {
+                        score++;
+                    }
+                }
+
+                if (!isComplete) {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Vui lòng trả lời đủ các câu hỏi!';
+                    submitBtn.style.backgroundColor = 'var(--error-text)';
+                    submitBtn.style.color = '#fff';
+                    
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.backgroundColor = 'var(--primary)';
+                    }, 2500);
+                    return;
+                }
+
+                // Chuyển UI
+                quizContainer.style.display = 'none';
+                quizResultBox.style.display = 'block';
+                quizResultBox.className = 'quiz-result-box'; // reset
+
+                resultText.innerHTML = `Bạn đã trả lời đúng <strong>${score}/${total}</strong> câu hỏi.`;
+
+                if (score === total) {
+                    resultTitle.innerHTML = '<i class="fa-solid fa-circle-check"></i> Tuyệt vời! Bạn nắm rất vững.';
+                    quizResultBox.classList.add('success');
+                } else if (score > 0) {
+                    resultTitle.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khá tốt! Hãy ôn tập thêm nhé.';
+                    quizResultBox.classList.add('warning');
+                } else {
+                    resultTitle.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Oops! Cần xem lại bài học rồi.';
+                    quizResultBox.classList.add('error');
+                }
+            });
+
+            retryBtn.addEventListener('click', () => {
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                quizResultBox.style.display = 'none';
+                quizContainer.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
