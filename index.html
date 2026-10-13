@@ -8,7 +8,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg,#4c5fd5 0%  #5e12af 100%);
+            /* Đã thêm dấu phẩy (,) bị thiếu giữa các màu trong linear-gradient */
+            background: linear-gradient(135deg, #4c5fd5 0%, #5e12af 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,7 +24,7 @@
             box-shadow: 0 14px 36px rgba(0,0,0,0.18);
             text-align: center;
         }
-       h1 { color: #4c5fd5; margin-bottom: 8px; font-size: 32px; }
+        h1 { color: #4c5fd5; margin-bottom: 8px; font-size: 32px; }
         h2 { color: #0a090b; margin-bottom: 24px; font-size: 18px; font-weight: normal; }
         .info { background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 16px 0; text-align: left; }
         .info p { margin: 8px 0; }
@@ -43,12 +44,11 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="images.jpg" alt="Profile" width="100" height="100" fetchpriority=high>    
-        <h1> Xin chào, NGô Trung Kiên!</h1>
+    <!-- Thay thế <div class="container"> thành <main class="container"> -->
+    <main class="container">
+        <img src="images.jpg" alt="Profile" width="100" height="100" fetchpriority="high">    
+        <h1> Xin chào, Ngô Trung Kiên!</h1>
         <h2>Chào mừng bạn đến với trang Portfolio của tôi!</h2>
-
-        
 
         <div class="info">
             <p> <strong>Bài học:</strong> DevOps Lab 1 — Tổng quan</p>
@@ -66,11 +66,12 @@
             <a href="links.html#devops" class="badge">DevOps</a>
         </div>
 
-        <div class="footer">
+        <!-- Thay thế div thành footer cho chuẩn Semantic HTML -->
+        <footer class="footer">
             <p>Deployed automatically via GitHub Actions Pipeline</p>
             <p> Push code → CI Build → Auto Deploy → Live! </p>
-        </div>
-    </div>
+        </footer>
+    </main>
 
     <script>
         const dateElement = document.getElementById('date');
